@@ -269,7 +269,7 @@ func del(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrap
 			IPv4Addr:                   k8sArgs.IP.String(),
 			Reason:                     "PodDeleted"})
 
-	// err is nil because ErrUnknownPod is ignored.
+	// success is true because ErrUnknownPod is ignored.
 	// r.IPv4Addr and r.DeviceNumber are "" and 0 respectively because UnassignPodIPv4Address returned
 	// return "", 0, ErrUnknownPod
 	// TeardownNS below is going to be passed addr=nil and table=0
