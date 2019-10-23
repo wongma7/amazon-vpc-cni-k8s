@@ -269,6 +269,20 @@ func del(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrap
 			IPv4Addr:                   k8sArgs.IP.String(),
 			Reason:                     "PodDeleted"})
 
+	// err is nil because ErrUnknownPod is ignored.
+	// r.IPv4Addr and r.DeviceNumber are 0 and "" respectively because UnassignPodIPv4Address returned
+	// return "", 0, ErrUnknownPod
+	// TeardownNS below is going to be passed addr=nil and table=0
+	// addrHostAddr will be nil if addr is nil: https://play.golang.org/p/96BAsE22g3u
+	// It will call
+	/*
+	if err = netLink.RouteDel(&netlink.Route{
+		Scope: netlink.SCOPE_LINK,
+		Dst:   nil}); err != nil {
+		log.Errorf("delete NS network: failed to delete host route for %s, %v", addr.String(), err)
+	}
+	*/
+	// and God knows what rule actually gets deleted since Dst is nil. Whatever happens to be the latest?
 	if err != nil {
 		log.Errorf("Error received from DelNetwork grpc call for pod %s namespace %s container %s: %v",
 			string(k8sArgs.K8S_POD_NAME), string(k8sArgs.K8S_POD_NAMESPACE), string(k8sArgs.K8S_POD_INFRA_CONTAINER_ID), err)
