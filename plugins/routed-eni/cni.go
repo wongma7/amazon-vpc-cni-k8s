@@ -270,7 +270,7 @@ func del(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrap
 			Reason:                     "PodDeleted"})
 
 	// err is nil because ErrUnknownPod is ignored.
-	// r.IPv4Addr and r.DeviceNumber are 0 and "" respectively because UnassignPodIPv4Address returned
+	// r.IPv4Addr and r.DeviceNumber are "" and 0 respectively because UnassignPodIPv4Address returned
 	// return "", 0, ErrUnknownPod
 	// TeardownNS below is going to be passed addr=nil and table=0
 	// addrHostAddr will be nil if addr is nil: https://play.golang.org/p/96BAsE22g3u
