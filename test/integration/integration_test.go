@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/config"
 	. "github.com/onsi/gomega"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,6 +50,16 @@ func RegisterFlags(flags *flag.FlagSet) {
 
 	// Custom flags
 	flags.StringVar(&LocalTestContext.AssetsDir, "assets", "assets", "The directory that holds assets used by the integration test.")
+
+	// Configure ginkgo as done by framework.RegisterCommonFlags
+	// Turn on verbose by default to get spec names
+	config.DefaultReporterConfig.Verbose = true
+
+	// Turn on EmitSpecProgress to get spec progress (especially on interrupt)
+	config.GinkgoConfig.EmitSpecProgress = true
+
+	// Randomize specs as well as suites
+	config.GinkgoConfig.RandomizeAllSpecs = true
 }
 
 func TestIntegration(t *testing.T) {
@@ -112,6 +123,15 @@ var _ = ginkgo.Describe("[cni-integration]", func() {
 		framework.ExpectNoError(
 			framework.CheckConnectivityToHost(f, "", "client-pod", serverPod.Status.PodIP, framework.IPv4PingCommand, 30))
 	})
+
+	ginkgo.It("should enable pod-node communication", func() {
+		nodeList := framework.GetReadySchedulableNodesOrDie(f.ClientSet)
+		internalIP, err := framework.GetNodeInternalIP(&nodeList.Items[0])
+		framework.ExpectNoError(err, "getting node internal IP")
+		framework.ExpectNoError(
+			framework.CheckConnectivityToHost(f, "", "client-pod", internalIP, framework.IPv4PingCommand, 30))
+	})
+
 })
 
 func applyTestDeployment() {
